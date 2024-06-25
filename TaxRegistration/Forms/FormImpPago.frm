@@ -2,9 +2,9 @@ VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} FormImpPago 
    Caption         =   "EMBALAJES SRL"
    ClientHeight    =   6720
-   ClientLeft      =   750
-   ClientTop       =   2040
-   ClientWidth     =   8775.001
+   ClientLeft      =   810
+   ClientTop       =   2250
+   ClientWidth     =   13695
    OleObjectBlob   =   "FormImpPago.frx":0000
    StartUpPosition =   1  'Centrar en propietario
 End
@@ -32,18 +32,15 @@ Private Sub InitializeForm()
     Dim startRow As Long
     Dim endRow As Long
     
-    ' Configurar la hoja y la tabla
-    On Error GoTo ErrorHandler
-    Set ws = ThisWorkbook.Sheets("ImpAnual")
-    Set tbl = ws.ListObjects("Tabla3")
+    ' Configurar la hoja activa y la tabla
+    Set ws = ActiveSheet
+    On Error Resume Next
+    Set tbl = ws.ListObjects(1)  ' Intenta obtener la primera tabla en la hoja activa
+    On Error GoTo 0
 
-    ' Verifica que la tabla y la hoja son correctas
-    If ws Is Nothing Then
-        MsgBox "La hoja 'ImpAnual' no se encontró.", vbCritical
-        Exit Sub
-    End If
+    ' Verificar que la tabla y la hoja son correctas
     If tbl Is Nothing Then
-        MsgBox "La tabla 'Tabla3' no se encontró en la hoja 'ImpAnual'.", vbCritical
+        MsgBox "No se encontró ninguna tabla en la hoja activa.", vbCritical
         Exit Sub
     End If
     
@@ -103,16 +100,15 @@ Private Sub FilterServiceType(ByVal month As String)
 
     Me.ServiceType.Clear
 
-    On Error GoTo ErrorHandler
-    Set ws = ThisWorkbook.Sheets("ImpAnual")
-    Set tbl = ws.ListObjects("Tabla3")
+    ' Configurar la hoja activa y la tabla
+    Set ws = ActiveSheet
+    On Error Resume Next
+    Set tbl = ws.ListObjects(1)  ' Intenta obtener la primera tabla en la hoja activa
+    On Error GoTo 0
 
-    If ws Is Nothing Then
-        MsgBox "La hoja 'ImpAnual' no se encontró.", vbCritical
-        Exit Sub
-    End If
+    ' Verificar que la tabla y la hoja son correctas
     If tbl Is Nothing Then
-        MsgBox "La tabla 'Tabla3' no se encontró en la hoja 'ImpAnual'.", vbCritical
+        MsgBox "No se encontró ninguna tabla en la hoja activa.", vbCritical
         Exit Sub
     End If
 
@@ -167,17 +163,15 @@ Private Sub BtnCargar_Click()
         Exit Sub
     End If
 
-    On Error GoTo ErrorHandler
-    Set ws = ThisWorkbook.Sheets("ImpAnual")
-    Set tbl = ws.ListObjects("Tabla3")
+    ' Configurar la hoja activa y la tabla
+    Set ws = ActiveSheet
+    On Error Resume Next
+    Set tbl = ws.ListObjects(1)  ' Intenta obtener la primera tabla en la hoja activa
+    On Error GoTo 0
 
-    If ws Is Nothing Then
-        MsgBox "La hoja 'ImpAnual' no se encontró.", vbCritical
-        Exit Sub
-    End If
-    
+    ' Verificar que la tabla y la hoja son correctas
     If tbl Is Nothing Then
-        MsgBox "La tabla 'Tabla3' no se encontró en la hoja 'ImpAnual'.", vbCritical
+        MsgBox "No se encontró ninguna tabla en la hoja activa.", vbCritical
         Exit Sub
     End If
 
@@ -225,11 +219,11 @@ Private Sub BtnCargar_Click()
             End If
             
             If Me.TextBoxMonto.Value <> "" Then
-                cell.Offset(0, 8).Value = Me.TextBoxMonto.Value ' Columna M
+                cell.Offset(0, 8).Value = Me.TextBoxMonto.Value
             End If
             
-            If Me.TextBoxFechaPago.Value <> "" Then
-                cell.Offset(0, 9).Value = Me.TextBoxFechaPago.Value ' Columna N
+            If Me.TextBoxFechaPago.Text <> "" Then
+                cell.Offset(0, 9).Value = "'" & Me.TextBoxFechaPago.Text ' Columna N
             End If
             
             Exit For
@@ -365,19 +359,15 @@ Private Sub ServiceDetail_Change()
         Exit Sub
     End If
 
-    ' Configurar la hoja y la tabla
-    On Error GoTo ErrorHandler
-    Set ws = ThisWorkbook.Sheets("ImpAnual")
-    Set tbl = ws.ListObjects("Tabla3")
+    ' Configurar la hoja activa y la tabla
+    Set ws = ActiveSheet
+    On Error Resume Next
+    Set tbl = ws.ListObjects(1)  ' Intenta obtener la primera tabla en la hoja activa
+    On Error GoTo 0
 
-    ' Verifica que la tabla y la hoja son correctas
-    If ws Is Nothing Then
-        MsgBox "La hoja 'ImpAnual' no se encontró.", vbCritical
-        Exit Sub
-    End If
-    
+    ' Verificar que la tabla y la hoja son correctas
     If tbl Is Nothing Then
-        MsgBox "La tabla 'Tabla3' no se encontró en la hoja 'ImpAnual'.", vbCritical
+        MsgBox "No se encontró ninguna tabla en la hoja activa.", vbCritical
         Exit Sub
     End If
 
@@ -482,19 +472,15 @@ Private Sub ServiceType_Change()
     ' Mostrar el valor seleccionado en SelectedType
     Me.SelectedType.Value = SelectedType
 
-    ' Configurar la hoja y la tabla
-    On Error GoTo ErrorHandler
-    Set ws = ThisWorkbook.Sheets("ImpAnual")
-    Set tbl = ws.ListObjects("Tabla3")
+    ' Configurar la hoja activa y la tabla
+    Set ws = ActiveSheet
+    On Error Resume Next
+    Set tbl = ws.ListObjects(1)  ' Intenta obtener la primera tabla en la hoja activa
+    On Error GoTo 0
 
-    ' Verifica que la tabla y la hoja son correctas
-    If ws Is Nothing Then
-        MsgBox "La hoja 'ImpAnual' no se encontró.", vbCritical
-        Exit Sub
-    End If
-    
+    ' Verificar que la tabla y la hoja son correctas
     If tbl Is Nothing Then
-        MsgBox "La tabla 'Tabla3' no se encontró en la hoja 'ImpAnual'.", vbCritical
+        MsgBox "No se encontró ninguna tabla en la hoja activa.", vbCritical
         Exit Sub
     End If
 

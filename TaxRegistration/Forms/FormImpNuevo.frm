@@ -1,10 +1,10 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} FormImpNuevo 
    Caption         =   "EMBALAJES SRL"
-   ClientHeight    =   8490.001
-   ClientLeft      =   1080
-   ClientTop       =   3465
-   ClientWidth     =   8805.001
+   ClientHeight    =   10605
+   ClientLeft      =   1170
+   ClientTop       =   3825
+   ClientWidth     =   17175
    OleObjectBlob   =   "FormImpNuevo.frx":0000
    StartUpPosition =   1  'Centrar en propietario
 End
@@ -456,6 +456,19 @@ Private Sub CheckBoxTodos_Click()
     TextBox11.Enabled = isChecked
     TextBox12.Enabled = isChecked
     
+    Label11.Enabled = isChecked
+    Label12.Enabled = isChecked
+    Label13.Enabled = isChecked
+    Label14.Enabled = isChecked
+    Label15.Enabled = isChecked
+    Label16.Enabled = isChecked
+    Label18.Enabled = isChecked
+    Label19.Enabled = isChecked
+    Label20.Enabled = isChecked
+    Label21.Enabled = isChecked
+    Label22.Enabled = isChecked
+    Label23.Enabled = isChecked
+    
     ' Configurar el color de fondo y fuente de los textboxes según su estado
     If isChecked Then
         TextEnero.BackColor = RGB(255, 255, 255)  ' Color de fondo blanco cuando está activo
@@ -509,6 +522,19 @@ Private Sub CheckBoxTodos_Click()
         TextBox10.ForeColor = RGB(0, 0, 0)
         TextBox11.ForeColor = RGB(0, 0, 0)
         TextBox12.ForeColor = RGB(0, 0, 0)
+        
+        Label11.ForeColor = RGB(0, 0, 0)  ' Color de fuente negro cuando está activo
+        Label12.ForeColor = RGB(0, 0, 0)
+        Label13.ForeColor = RGB(0, 0, 0)
+        Label14.ForeColor = RGB(0, 0, 0)
+        Label15.ForeColor = RGB(0, 0, 0)
+        Label16.ForeColor = RGB(0, 0, 0)
+        Label18.ForeColor = RGB(0, 0, 0)
+        Label19.ForeColor = RGB(0, 0, 0)
+        Label20.ForeColor = RGB(0, 0, 0)
+        Label21.ForeColor = RGB(0, 0, 0)
+        Label22.ForeColor = RGB(0, 0, 0)
+        Label23.ForeColor = RGB(0, 0, 0)
     Else
         TextEnero.BackColor = RGB(240, 240, 240)  ' Color de fondo gris claro cuando está inactivo
         TextFebrero.BackColor = RGB(240, 240, 240)
@@ -561,22 +587,7 @@ Private Sub CheckBoxTodos_Click()
         TextBox10.ForeColor = RGB(128, 128, 128)
         TextBox11.ForeColor = RGB(128, 128, 128)
         TextBox12.ForeColor = RGB(128, 128, 128)
-    End If
-    
-    If isChecked Then
-        Label11.ForeColor = RGB(0, 0, 0)  ' Color de fuente negro cuando está activo
-        Label12.ForeColor = RGB(0, 0, 0)
-        Label13.ForeColor = RGB(0, 0, 0)
-        Label14.ForeColor = RGB(0, 0, 0)
-        Label15.ForeColor = RGB(0, 0, 0)
-        Label16.ForeColor = RGB(0, 0, 0)
-        Label18.ForeColor = RGB(0, 0, 0)
-        Label19.ForeColor = RGB(0, 0, 0)
-        Label20.ForeColor = RGB(0, 0, 0)
-        Label21.ForeColor = RGB(0, 0, 0)
-        Label22.ForeColor = RGB(0, 0, 0)
-        Label23.ForeColor = RGB(0, 0, 0)
-    Else
+        
         Label11.ForeColor = RGB(128, 128, 128)  ' Color de fuente gris oscuro cuando está inactivo
         Label12.ForeColor = RGB(128, 128, 128)
         Label13.ForeColor = RGB(128, 128, 128)
@@ -590,6 +601,7 @@ Private Sub CheckBoxTodos_Click()
         Label22.ForeColor = RGB(128, 128, 128)
         Label23.ForeColor = RGB(128, 128, 128)
     End If
+
 End Sub
 
 ' BOTON CARGAR FORMULARIO
@@ -600,8 +612,11 @@ Private Sub Cargar_Click()
     Dim mes As String
     Dim fila As Long
     
-    Set ws = ThisWorkbook.Sheets("ImpAnual")
-    fila = ws.ListObjects("Tabla3").ListRows.Count + 1 ' Próxima fila disponible en la tabla
+        ' Configurar la hoja activa y la tabla
+    Set ws = ActiveSheet
+    On Error Resume Next
+    fila = ws.ListObjects(1).ListRows.Count + 1 ' Próxima fila disponible en la tabla  ' Intenta obtener la primera tabla en la hoja activa
+    On Error GoTo 0
     
     ' Validar que al menos un checkbox esté seleccionado
     If Not CheckBoxEne.Value And Not CheckBoxFeb.Value And Not CheckBoxMar.Value And _
@@ -655,7 +670,7 @@ End Sub
 
 Private Sub InsertarFila(ws As Worksheet, fila As Long, mes As String)
     
-    With ws.ListObjects("Tabla3").ListRows.Add(fila).Range
+    With ws.ListObjects(1).ListRows.Add(fila).Range
         .Cells(1, 1).Value = mes ' Columna A: Mes
         .Cells(1, 3).Value = TextBoxCUIT.Text ' Columna C: CUIT
         .Cells(1, 4).Value = TextBoxTipoServicio.Text ' Columna D: Tipo de Servicio
@@ -667,51 +682,51 @@ Private Sub InsertarFila(ws As Worksheet, fila As Long, mes As String)
         
         ' Insertar los valores de los campos de texto adicionales según el mes seleccionado o todos los meses
         If mes = "ene" Then
-            .Cells(1, 13).Value = IIf(TextEnero.Enabled, "'" & TextEnero.Text, "")
+            .Cells(1, 13).Value = IIf(TextEnero.Enabled, TextEnero.Text, "")
             .Cells(1, 11).Value = IIf(TextBox1.Enabled, "'" & TextBox1.Text, "")
         End If
         If mes = "feb" Then
-            .Cells(1, 13).Value = IIf(TextFebrero.Enabled, "'" & TextFebrero.Text, "")
+            .Cells(1, 13).Value = IIf(TextFebrero.Enabled, TextFebrero.Text, "")
             .Cells(1, 11).Value = IIf(TextBox2.Enabled, "'" & TextBox2.Text, "")
         End If
         If mes = "mar" Then
-            .Cells(1, 13).Value = IIf(TextMarzo.Enabled, "'" & TextMarzo.Text, "")
+            .Cells(1, 13).Value = IIf(TextMarzo.Enabled, TextMarzo.Text, "")
             .Cells(1, 11).Value = IIf(TextBox3.Enabled, "'" & TextBox3.Text, "")
         End If
         If mes = "abr" Then
-            .Cells(1, 13).Value = IIf(TextAbril.Enabled, "'" & TextAbril.Text, "")
+            .Cells(1, 13).Value = IIf(TextAbril.Enabled, TextAbril.Text, "")
             .Cells(1, 11).Value = IIf(TextBox4.Enabled, "'" & TextBox4.Text, "")
         End If
         If mes = "may" Then
-            .Cells(1, 13).Value = IIf(TextMayo.Enabled, "'" & TextMayo.Text, "")
+            .Cells(1, 13).Value = IIf(TextMayo.Enabled, TextMayo.Text, "")
             .Cells(1, 11).Value = IIf(TextBox5.Enabled, "'" & TextBox5.Text, "")
         End If
         If mes = "jun" Then
-            .Cells(1, 13).Value = IIf(TextJunio.Enabled, "'" & TextJunio.Text, "")
+            .Cells(1, 13).Value = IIf(TextJunio.Enabled, TextJunio.Text, "")
             .Cells(1, 11).Value = IIf(TextBox6.Enabled, "'" & TextBox6.Text, "")
         End If
         If mes = "jul" Then
-            .Cells(1, 13).Value = IIf(TextJulio.Enabled, "'" & TextJulio.Text, "")
+            .Cells(1, 13).Value = IIf(TextJulio.Enabled, TextJulio.Text, "")
             .Cells(1, 11).Value = IIf(TextBox7.Enabled, "'" & TextBox7.Text, "")
         End If
         If mes = "ago" Then
-            .Cells(1, 13).Value = IIf(TextAgosto.Enabled, "'" & TextAgosto.Text, "")
+            .Cells(1, 13).Value = IIf(TextAgosto.Enabled, TextAgosto.Text, "")
             .Cells(1, 11).Value = IIf(TextBox8.Enabled, "'" & TextBox8.Text, "")
         End If
         If mes = "sep" Then
-            .Cells(1, 13).Value = IIf(TextSeptiembre.Enabled, "'" & TextSeptiembre.Text, "")
+            .Cells(1, 13).Value = IIf(TextSeptiembre.Enabled, TextSeptiembre.Text, "")
             .Cells(1, 11).Value = IIf(TextBox9.Enabled, "'" & TextBox9.Text, "")
         End If
         If mes = "oct" Then
-            .Cells(1, 13).Value = IIf(TextOctubre.Enabled, "'" & TextOctubre.Text, "")
+            .Cells(1, 13).Value = IIf(TextOctubre.Enabled, TextOctubre.Text, "")
             .Cells(1, 11).Value = IIf(TextBox10.Enabled, "'" & TextBox10.Text, "")
         End If
         If mes = "nov" Then
-            .Cells(1, 13).Value = IIf(TextNoviembre.Enabled, "'" & TextNoviembre.Text, "")
+            .Cells(1, 13).Value = IIf(TextNoviembre.Enabled, TextNoviembre.Text, "")
             .Cells(1, 11).Value = IIf(TextBox11.Enabled, "'" & TextBox11.Text, "")
         End If
         If mes = "dic" Then
-            .Cells(1, 13).Value = IIf(TextDiciembre.Enabled, "'" & TextDiciembre.Text, "")
+            .Cells(1, 13).Value = IIf(TextDiciembre.Enabled, TextDiciembre.Text, "")
             .Cells(1, 11).Value = IIf(TextBox12.Enabled, "'" & TextBox12.Text, "")
         End If
     End With
