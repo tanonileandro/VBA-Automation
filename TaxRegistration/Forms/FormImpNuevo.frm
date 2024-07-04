@@ -1,10 +1,10 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} FormImpNuevo 
    Caption         =   "EMBALAJES SRL"
-   ClientHeight    =   10605
-   ClientLeft      =   1170
-   ClientTop       =   3825
-   ClientWidth     =   17175
+   ClientHeight    =   14175
+   ClientLeft      =   1830
+   ClientTop       =   6420
+   ClientWidth     =   13800
    OleObjectBlob   =   "FormImpNuevo.frx":0000
    StartUpPosition =   1  'Centrar en propietario
 End
@@ -13,9 +13,11 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+' Variable global para almacenar la ruta del PDF seleccionado
+Dim pdfPathGlobal As String
+
 
 ' INICIALIZACION DEL FORMULARIO
-
 Private Sub UserForm_Initialize()
     ' Enero
     TextEnero.Enabled = False
@@ -139,7 +141,7 @@ Private Sub UserForm_Initialize()
     
     ' Tamaño del formulario
     Me.Width = 455
-    Me.Height = 366
+    Me.Height = 397
     
     ' Posición del formulario al centro de la pantalla principal de Excel
     Me.StartUpPosition = 0
@@ -604,19 +606,30 @@ Private Sub CheckBoxTodos_Click()
 
 End Sub
 
-' BOTON CARGAR FORMULARIO
-
+' CARGAR DATOS DEL FORMULARIO EN LA TABLA
 Private Sub Cargar_Click()
     Dim ws As Worksheet
     Dim i As Integer
     Dim mes As String
     Dim fila As Long
+    Dim tbl As ListObject
     
-        ' Configurar la hoja activa y la tabla
+    ' Configurar la hoja activa y la tabla
     Set ws = ActiveSheet
     On Error Resume Next
-    fila = ws.ListObjects(1).ListRows.Count + 1 ' Próxima fila disponible en la tabla  ' Intenta obtener la primera tabla en la hoja activa
+    Set tbl = ws.ListObjects(1) ' Intenta obtener la primera tabla en la hoja activa
     On Error GoTo 0
+    
+    ' Desactivar filtro si está aplicado
+    If Not tbl Is Nothing Then
+        If tbl.AutoFilter.FilterMode Then
+            ' Desactivar filtro de forma permanente
+            tbl.AutoFilter.ShowAllData
+        End If
+    End If
+    
+    ' Obtener próxima fila disponible en la tabla
+    fila = tbl.ListRows.Count + 1
     
     ' Validar que al menos un checkbox esté seleccionado
     If Not CheckBoxEne.Value And Not CheckBoxFeb.Value And Not CheckBoxMar.Value And _
@@ -640,37 +653,36 @@ Private Sub Cargar_Click()
         ' Si se selecciona Todos, se recorren todos los meses y se inserta una fila por cada uno
         For i = 1 To 12
             mes = Format(DateSerial(Year(Date), i, 1), "Mmm") ' Obtener el nombre del mes en tres letras
-            InsertarFila ws, fila, mes
+            InsertarFila tbl, fila, mes
             fila = fila + 1
         Next i
     Else
         ' Si no se selecciona Todos, se inserta una fila por cada checkbox seleccionado
-        If CheckBoxEne.Value Then InsertarFila ws, fila, "ene"
-        If CheckBoxFeb.Value Then InsertarFila ws, fila, "feb"
-        If CheckBoxMar.Value Then InsertarFila ws, fila, "mar"
-        If CheckBoxAbr.Value Then InsertarFila ws, fila, "abr"
-        If CheckBoxMay.Value Then InsertarFila ws, fila, "may"
-        If CheckBoxJun.Value Then InsertarFila ws, fila, "jun"
-        If CheckBoxJul.Value Then InsertarFila ws, fila, "jul"
-        If CheckBoxAgo.Value Then InsertarFila ws, fila, "ago"
-        If CheckBoxSep.Value Then InsertarFila ws, fila, "sep"
-        If CheckBoxOct.Value Then InsertarFila ws, fila, "oct"
-        If CheckBoxNov.Value Then InsertarFila ws, fila, "nov"
-        If CheckBoxDic.Value Then InsertarFila ws, fila, "dic"
+        If CheckBoxEne.Value Then InsertarFila tbl, fila, "ene"
+        If CheckBoxFeb.Value Then InsertarFila tbl, fila, "feb"
+        If CheckBoxMar.Value Then InsertarFila tbl, fila, "mar"
+        If CheckBoxAbr.Value Then InsertarFila tbl, fila, "abr"
+        If CheckBoxMay.Value Then InsertarFila tbl, fila, "may"
+        If CheckBoxJun.Value Then InsertarFila tbl, fila, "jun"
+        If CheckBoxJul.Value Then InsertarFila tbl, fila, "jul"
+        If CheckBoxAgo.Value Then InsertarFila tbl, fila, "ago"
+        If CheckBoxSep.Value Then InsertarFila tbl, fila, "sep"
+        If CheckBoxOct.Value Then InsertarFila tbl, fila, "oct"
+        If CheckBoxNov.Value Then InsertarFila tbl, fila, "nov"
+        If CheckBoxDic.Value Then InsertarFila tbl, fila, "dic"
     End If
-    
-    ' Limpiar campos después de insertar los datos
-    LimpiarCampos
-    
-    ' Informar al usuario que los datos han sido cargados correctamente
-    MsgBox "Los datos han sido cargados exitosamente.", vbInformation
+        ' Llamar a la función para asignar los números de mes
+    AsignarNumerosDeMes
+    ' Cerrar el formulario para limpiar los campos
+    Unload Me
 End Sub
 
-' FUNCION LLAMADA PARA INSERTAR FILAS
-
-Private Sub InsertarFila(ws As Worksheet, fila As Long, mes As String)
+Private Sub InsertarFila(tbl As ListObject, ByRef fila As Long, mes As String)
+    ' Añadir nueva fila al final de la tabla
+    Dim nuevaFila As ListRow
+    Set nuevaFila = tbl.ListRows.Add(AlwaysInsert:=True)
     
-    With ws.ListObjects(1).ListRows.Add(fila).Range
+    With nuevaFila.Range
         .Cells(1, 1).Value = mes ' Columna A: Mes
         .Cells(1, 3).Value = TextBoxCUIT.Text ' Columna C: CUIT
         .Cells(1, 4).Value = TextBoxTipoServicio.Text ' Columna D: Tipo de Servicio
@@ -678,73 +690,147 @@ Private Sub InsertarFila(ws As Worksheet, fila As Long, mes As String)
         .Cells(1, 6).Value = TextBoxDireccion.Text ' Columna F: Dirección
         .Cells(1, 7).Value = TextBoxCuenta.Text ' Columna G: Cuenta
         .Cells(1, 8).Value = TextBoxNroCuenta.Text ' Columna H: NroCuenta
-        .Cells(1, 9).Value = TextBoxNroIdentificacion.Text ' Columna I: NroIdentificacion
+        .Cells(1, 9).Value = TextBoxNroIdentificacion.Text ' Columna I: NroIdentificación
+        .Cells(1, 16).Value = TextBoxObservaciones.Text
+        
+        ' Insertar la ruta del PDF como hipervínculo en la columna L (12) si hay un PDF seleccionado
+        If pdfPathGlobal <> "" Then
+            Dim rng As Range
+            Set rng = .Cells(1, 12)
+            rng.Hyperlinks.Add Anchor:=rng, Address:=pdfPathGlobal, TextToDisplay:="Abrir Comprobante"
+        End If
         
         ' Insertar los valores de los campos de texto adicionales según el mes seleccionado o todos los meses
-        If mes = "ene" Then
-            .Cells(1, 13).Value = IIf(TextEnero.Enabled, TextEnero.Text, "")
-            .Cells(1, 11).Value = IIf(TextBox1.Enabled, "'" & TextBox1.Text, "")
-        End If
-        If mes = "feb" Then
-            .Cells(1, 13).Value = IIf(TextFebrero.Enabled, TextFebrero.Text, "")
-            .Cells(1, 11).Value = IIf(TextBox2.Enabled, "'" & TextBox2.Text, "")
-        End If
-        If mes = "mar" Then
-            .Cells(1, 13).Value = IIf(TextMarzo.Enabled, TextMarzo.Text, "")
-            .Cells(1, 11).Value = IIf(TextBox3.Enabled, "'" & TextBox3.Text, "")
-        End If
-        If mes = "abr" Then
-            .Cells(1, 13).Value = IIf(TextAbril.Enabled, TextAbril.Text, "")
-            .Cells(1, 11).Value = IIf(TextBox4.Enabled, "'" & TextBox4.Text, "")
-        End If
-        If mes = "may" Then
-            .Cells(1, 13).Value = IIf(TextMayo.Enabled, TextMayo.Text, "")
-            .Cells(1, 11).Value = IIf(TextBox5.Enabled, "'" & TextBox5.Text, "")
-        End If
-        If mes = "jun" Then
-            .Cells(1, 13).Value = IIf(TextJunio.Enabled, TextJunio.Text, "")
-            .Cells(1, 11).Value = IIf(TextBox6.Enabled, "'" & TextBox6.Text, "")
-        End If
-        If mes = "jul" Then
-            .Cells(1, 13).Value = IIf(TextJulio.Enabled, TextJulio.Text, "")
-            .Cells(1, 11).Value = IIf(TextBox7.Enabled, "'" & TextBox7.Text, "")
-        End If
-        If mes = "ago" Then
-            .Cells(1, 13).Value = IIf(TextAgosto.Enabled, TextAgosto.Text, "")
-            .Cells(1, 11).Value = IIf(TextBox8.Enabled, "'" & TextBox8.Text, "")
-        End If
-        If mes = "sep" Then
-            .Cells(1, 13).Value = IIf(TextSeptiembre.Enabled, TextSeptiembre.Text, "")
-            .Cells(1, 11).Value = IIf(TextBox9.Enabled, "'" & TextBox9.Text, "")
-        End If
-        If mes = "oct" Then
-            .Cells(1, 13).Value = IIf(TextOctubre.Enabled, TextOctubre.Text, "")
-            .Cells(1, 11).Value = IIf(TextBox10.Enabled, "'" & TextBox10.Text, "")
-        End If
-        If mes = "nov" Then
-            .Cells(1, 13).Value = IIf(TextNoviembre.Enabled, TextNoviembre.Text, "")
-            .Cells(1, 11).Value = IIf(TextBox11.Enabled, "'" & TextBox11.Text, "")
-        End If
-        If mes = "dic" Then
-            .Cells(1, 13).Value = IIf(TextDiciembre.Enabled, TextDiciembre.Text, "")
-            .Cells(1, 11).Value = IIf(TextBox12.Enabled, "'" & TextBox12.Text, "")
+        Select Case mes
+            Case "ene"
+                .Cells(1, 13).Value = IIf(TextEnero.Enabled, TextEnero.Text, "")
+                .Cells(1, 11).Value = IIf(TextBox1.Enabled, "'" & TextBox1.Text, "")
+            Case "feb"
+                .Cells(1, 13).Value = IIf(TextFebrero.Enabled, TextFebrero.Text, "")
+                .Cells(1, 11).Value = IIf(TextBox2.Enabled, "'" & TextBox2.Text, "")
+            Case "mar"
+                .Cells(1, 13).Value = IIf(TextMarzo.Enabled, TextMarzo.Text, "")
+                .Cells(1, 11).Value = IIf(TextBox3.Enabled, "'" & TextBox3.Text, "")
+            Case "abr"
+                .Cells(1, 13).Value = IIf(TextAbril.Enabled, TextAbril.Text, "")
+                .Cells(1, 11).Value = IIf(TextBox4.Enabled, "'" & TextBox4.Text, "")
+            Case "may"
+                .Cells(1, 13).Value = IIf(TextMayo.Enabled, TextMayo.Text, "")
+                .Cells(1, 11).Value = IIf(TextBox5.Enabled, "'" & TextBox5.Text, "")
+            Case "jun"
+                .Cells(1, 13).Value = IIf(TextJunio.Enabled, TextJunio.Text, "")
+                .Cells(1, 11).Value = IIf(TextBox6.Enabled, "'" & TextBox6.Text, "")
+            Case "jul"
+                .Cells(1, 13).Value = IIf(TextJulio.Enabled, TextJulio.Text, "")
+                .Cells(1, 11).Value = IIf(TextBox7.Enabled, "'" & TextBox7.Text, "")
+            Case "ago"
+                .Cells(1, 13).Value = IIf(TextAgosto.Enabled, TextAgosto.Text, "")
+                .Cells(1, 11).Value = IIf(TextBox8.Enabled, "'" & TextBox8.Text, "")
+            Case "sep"
+                .Cells(1, 13).Value = IIf(TextSeptiembre.Enabled, TextSeptiembre.Text, "")
+                .Cells(1, 11).Value = IIf(TextBox9.Enabled, "'" & TextBox9.Text, "")
+            Case "oct"
+                .Cells(1, 13).Value = IIf(TextOctubre.Enabled, TextOctubre.Text, "")
+                .Cells(1, 11).Value = IIf(TextBox10.Enabled, "'" & TextBox10.Text, "")
+            Case "nov"
+                .Cells(1, 13).Value = IIf(TextNoviembre.Enabled, TextNoviembre.Text, "")
+                .Cells(1, 11).Value = IIf(TextBox11.Enabled, "'" & TextBox11.Text, "")
+            Case "dic"
+                .Cells(1, 13).Value = IIf(TextDiciembre.Enabled, TextDiciembre.Text, "")
+                .Cells(1, 11).Value = IIf(TextBox12.Enabled, "'" & TextBox12.Text, "")
+        End Select
+    End With
+    
+    ' Incrementar la variable fila para seguir controlando el número de la próxima fila
+    fila = fila + 1
+End Sub
+
+' CARGAR PDF
+Private Sub ButtonCargaImp_Click()
+    ' Abrir el diálogo para seleccionar el PDF de Imp
+    pdfImpPath = SelectPDFFile
+    
+    ' Verificar si se seleccionó un PDF
+    If pdfImpPath <> "" Then
+        ' Guardar la ruta del PDF seleccionado en la variable global
+        pdfPathGlobal = pdfImpPath
+        Me.MsjCargaImp.Caption = "PDF cargado OK"
+    End If
+End Sub
+Private Function SelectPDFFile() As String
+    Dim fd As FileDialog
+    Dim selectedFile As String
+    
+    ' Configurar el diálogo de selección de archivo
+    Set fd = Application.FileDialog(msoFileDialogFilePicker)
+    With fd
+        .Title = "Seleccionar archivo PDF"
+        .Filters.Clear
+        .Filters.Add "Archivos PDF", "*.pdf"
+        .FilterIndex = 1
+        .ButtonName = "Seleccionar"
+        .AllowMultiSelect = False
+        
+        If .Show = -1 Then
+            selectedFile = .SelectedItems(1)
         End If
     End With
-End Sub
-
-' LIMPIAR CAMPOS LUEGO DE APRETAR EL BOTON DE CARGAR
-
-Private Sub LimpiarCampos()
     
-    Dim ctrl As Control
-    For Each ctrl In Me.Controls
-        If TypeOf ctrl Is MSForms.TextBox Then
-            ctrl.Text = ""
-        ElseIf TypeOf ctrl Is MSForms.CheckBox Then
-            ctrl.Value = False
-        End If
-    Next ctrl
-End Sub
-Private Sub CloseForm_Click()
-    FormImpNuevo.Hide
-End Sub
+    SelectPDFFile = selectedFile
+End Function
+
+' ASIGNAR NUMEROS EN LA COLUMNA Q SEGUN MES CARGADO
+Function AsignarNumerosDeMes() As Boolean
+    Dim ws As Worksheet
+    Dim tbl As ListObject
+    Dim lastRow As Long
+    Dim i As Long
+    Dim mes As String
+    Dim mesNumeros As Variant
+    
+    ' Definir los nombres de los meses y sus números correspondientes
+    mesNumeros = Array("ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic")
+    
+    ' Referenciar la hoja activa
+    Set ws = ActiveSheet
+    
+    ' Buscar la primera tabla en la hoja activa
+    On Error Resume Next
+    Set tbl = ws.ListObjects(1)  ' Intenta obtener la primera tabla en la hoja activa
+    On Error GoTo 0
+    
+    ' Verificar que la hoja y la tabla existen
+    If ws Is Nothing Then
+        MsgBox "La hoja activa no se encontró.", vbCritical
+        AsignarNumerosDeMes = False
+        Exit Function
+    End If
+    
+    If tbl Is Nothing Then
+        MsgBox "No se encontró ninguna tabla en la hoja activa.", vbCritical
+        AsignarNumerosDeMes = False
+        Exit Function
+    End If
+    
+    ' Encontrar la última fila con datos en la columna A de la tabla
+    lastRow = tbl.ListColumns("Mes").DataBodyRange.Rows.Count
+    
+    ' Iterar sobre las celdas de la columna A de la tabla
+    For i = 1 To lastRow
+        mes = Left(tbl.DataBodyRange(i, 1).Value, 3)  ' Obtener las primeras tres letras del mes en la columna A
+        
+        ' Buscar el mes en el array mesNumeros y asignar su posición + 1 (para que enero sea 1, febrero 2, etc.)
+        For j = LBound(mesNumeros) To UBound(mesNumeros)
+            If mes = mesNumeros(j) Then
+                tbl.DataBodyRange(i, "Q").Value = j + 1
+                Exit For
+            End If
+        Next j
+    Next i
+    
+    AsignarNumerosDeMes = True
+End Function
+
+
+
+
