@@ -1,11 +1,11 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} COTIZACIONES 
    Caption         =   "EMBALAJES SRL - Carga de Cotizaciones"
-   ClientHeight    =   12090
-   ClientLeft      =   -1605
-   ClientTop       =   -5805
-   ClientWidth     =   10770
-   OleObjectBlob   =   "FormMR.frx":0000
+   ClientHeight    =   12045
+   ClientLeft      =   -1125
+   ClientTop       =   -4005
+   ClientWidth     =   16455
+   OleObjectBlob   =   "FormCotizacion.frx":0000
    StartUpPosition =   1  'Centrar en propietario
 End
 Attribute VB_Name = "COTIZACIONES"
@@ -13,8 +13,6 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-
-
 Private Sub btnEnviarCorreo_Click()
     Dim OutlookApp As Object
     Dim OutlookMail As Object
@@ -38,8 +36,9 @@ Private Sub btnEnviarCorreo_Click()
     Set OutlookApp = Nothing
 
 End Sub
+Private Sub ComboBoxDestino_Change()
 
-
+End Sub
 
 Private Sub CommandButton1_Click()
     Dim Numero As String
@@ -103,7 +102,6 @@ Private Sub BtnCancelar_Click()
 Unload Me
 
 End Sub
-
 Private Sub BtnCargar_Click()
 Application.ScreenUpdating = False
 If Me.TxtIdCliente.Value <> Empty Then
@@ -134,36 +132,28 @@ If Me.TxtIdCliente.Value <> Empty Then
         End If
     Next i
     
-          'CALCULO DE TARIFA X M2'
-      Set Cell = Worksheets("TARIFARIO M2 2").Range("Tabla157912141620")
+        ' CALCULO DE TARIFA X M2
+        Set Cell = Worksheets("TARIFARIO M2 2").Range("Tabla157912141620")
+        tarifXm2 = 0
         For j = 1 To Cell.ListObject.Range.Rows.Count
             If Cell.ListObject.Range.Cells(j, 3) = Me.TxtCalidad.Value Then
-                If Me.TxtCategoria.Value = "A" Then
-                    tarifXm2 = Cell.ListObject.Range.Cells(j, 4)
-                    Else
-                    If Me.TxtCategoria.Value = "B" Then
-                    tarifXm2 = Cell.ListObject.Range.Cells(j, 5)
-                    Else
-                    If Me.TxtCategoria.Value = "C" Then
-                    tarifXm2 = Cell.ListObject.Range.Cells(j, 6)
-                    Else
-                    If Me.TxtCategoria.Value = "D" Then
-                    tarifXm2 = Cell.ListObject.Range.Cells(j, 7)
-                    Else
-                    If Me.TxtCategoria.Value = "E" Then
-                    tarifXm2 = Cell.ListObject.Range.Cells(j, 8)
-                    Else
-                    If Me.TxtCategoria.Value = "F" Then
-                    tarifXm2 = Cell.ListObject.Range.Cells(j, 9)
-                    End If
-                    End If
-                    End If
-                    End If
-                    End If
-                End If
+                Select Case Me.TxtCategoria.Value
+                    Case "A"
+                        tarifXm2 = Cell.ListObject.Range.Cells(j, 4)
+                    Case "B"
+                        tarifXm2 = Cell.ListObject.Range.Cells(j, 5)
+                    Case "C"
+                        tarifXm2 = Cell.ListObject.Range.Cells(j, 6)
+                    Case "D"
+                        tarifXm2 = Cell.ListObject.Range.Cells(j, 7)
+                    Case "E"
+                        tarifXm2 = Cell.ListObject.Range.Cells(j, 8)
+                    Case "F"
+                        tarifXm2 = Cell.ListObject.Range.Cells(j, 9)
+                End Select
             End If
         Next j
-            
+           
       'CALCULO DE TARIFA DE FLETE X DESTINO'
       If OptionButtonSi.Value = True Then
         Set Cell = Worksheets("TARIFARIO FLETE 2").Range("TablaFlete")
@@ -193,7 +183,16 @@ If Me.TxtIdCliente.Value <> Empty Then
                                 Cells(NR, 4) = Me.TxtDescCliente.Value
                                 Cells(NR, 5) = Me.TxtCodProd.Value
                                 Cells(NR, 6) = Me.TxtDescProd.Value
-                                Cells(NR, 7) = "=[@[TARIFARIO $/M2]]*[@M2]"
+                                ' Verifica si se ha ingresado un valor en CotDolar y si es mayor a 0
+                                If IsNumeric(Me.CotDolar.Value) And CDbl(Me.CotDolar.Value) > 0 Then
+                                    cotizacionDolar = CDbl(Me.CotDolar.Value)
+                                    Cells(NR, 7).Formula = "=[@[TARIFARIO $/M2]]*[@M2] / " & cotizacionDolar
+                                    
+                                    Cells(NR, 7).NumberFormat = "_-""USD""* #,##0.00_-;_-""USD""* #,##0.00_-;_-""USD""* ""-""??_-;_-@_-"
+                                Else
+                                    Cells(NR, 7).Formula = "=[@[TARIFARIO $/M2]]*[@M2]"
+                                End If
+                                  
                                 Cells(NR, 9) = Me.TxtCalidad.Value
                                 Cells(NR, 11) = CStr(Me.TxtM2.Value)
                                 Cells(NR, 12) = "SI"
@@ -222,7 +221,15 @@ If Me.TxtIdCliente.Value <> Empty Then
                                 Cells(NR, 4) = Me.TxtDescCliente.Value
                                 Cells(NR, 5) = Me.TxtCodProd.Value
                                 Cells(NR, 6) = Me.TxtDescProd.Value
-                                Cells(NR, 7) = "=[@[TARIFARIO $/M2]]*[@M2]"
+                                ' Verifica si se ha ingresado un valor en CotDolar y si es mayor a 0
+                                If IsNumeric(Me.CotDolar.Value) And CDbl(Me.CotDolar.Value) > 0 Then
+                                    cotizacionDolar = CDbl(Me.CotDolar.Value)
+                                    Cells(NR, 7).Formula = "=[@[TARIFARIO $/M2]]*[@M2] / " & cotizacionDolar
+                                    
+                                    Cells(NR, 7).NumberFormat = "_-""USD""* #,##0.00_-;_-""USD""* #,##0.00_-;_-""USD""* ""-""??_-;_-@_-"
+                                Else
+                                    Cells(NR, 7).Formula = "=[@[TARIFARIO $/M2]]*[@M2]"
+                                End If
                                 Cells(NR, 9) = Me.TxtCalidad.Value
                                 Cells(NR, 11) = CStr(Me.TxtM2.Value)
                                 Cells(NR, 12) = "NO"
@@ -239,6 +246,7 @@ If Me.TxtIdCliente.Value <> Empty Then
                                 MsgBox "Cotizacion Cargada"
                                 
                                 Sheets("pedidos").Select
+                                
                             End If
                             
                     End If
@@ -254,7 +262,15 @@ If Me.TxtIdCliente.Value <> Empty Then
                                 Cells(NR, 4) = Me.TxtDescCliente.Value
                                 Cells(NR, 5) = Me.TxtCodProd.Value
                                 Cells(NR, 6) = Me.TxtDescProd.Value
-                                Cells(NR, 7) = "=[@[TARIFARIO $/M2]]*[@M2]"
+                                ' Verifica si se ha ingresado un valor en CotDolar y si es mayor a 0
+                                If IsNumeric(Me.CotDolar.Value) And CDbl(Me.CotDolar.Value) > 0 Then
+                                    cotizacionDolar = CDbl(Me.CotDolar.Value)
+                                    Cells(NR, 7).Formula = "=[@[TARIFARIO $/M2]]*[@M2] / " & cotizacionDolar
+                                    
+                                    Cells(NR, 7).NumberFormat = "_-""USD""* #,##0.00_-;_-""USD""* #,##0.00_-;_-""USD""* ""-""??_-;_-@_-"
+                                Else
+                                    Cells(NR, 7).Formula = "=[@[TARIFARIO $/M2]]*[@M2]"
+                                End If
                                 Cells(NR, 9) = Me.TxtCalidad.Value
                                 Cells(NR, 11) = CStr(Me.TxtM2.Value)
                                 Cells(NR, 12) = "SI"
@@ -272,6 +288,7 @@ If Me.TxtIdCliente.Value <> Empty Then
                                 MsgBox "Cotizacion Cargada"
                                 
                                 Sheets("pedidos").Select
+                                
                                 Else
                                 
                                 Sheets("pedidos").Select
@@ -283,7 +300,15 @@ If Me.TxtIdCliente.Value <> Empty Then
                                 Cells(NR, 4) = Me.TxtDescCliente.Value
                                 Cells(NR, 5) = Me.TxtCodProd.Value
                                 Cells(NR, 6) = Me.TxtDescProd.Value
-                                Cells(NR, 7) = "=[@[TARIFARIO $/M2]]*[@M2]"
+                                ' Verifica si se ha ingresado un valor en CotDolar y si es mayor a 0
+                                If IsNumeric(Me.CotDolar.Value) And CDbl(Me.CotDolar.Value) > 0 Then
+                                    cotizacionDolar = CDbl(Me.CotDolar.Value)
+                                    Cells(NR, 7).Formula = "=[@[TARIFARIO $/M2]]*[@M2] / " & cotizacionDolar
+                                    
+                                    Cells(NR, 7).NumberFormat = "_-""USD""* #,##0.00_-;_-""USD""* #,##0.00_-;_-""USD""* ""-""??_-;_-@_-"
+                                Else
+                                    Cells(NR, 7).Formula = "=[@[TARIFARIO $/M2]]*[@M2]"
+                                End If
                                 Cells(NR, 9) = Me.TxtCalidad.Value
                                 Cells(NR, 11) = CStr(Me.TxtM2.Value)
                                 Cells(NR, 12) = "NO"
@@ -300,6 +325,7 @@ If Me.TxtIdCliente.Value <> Empty Then
                                 MsgBox "Cotizacion Cargada"
                                 
                                 Sheets("pedidos").Select
+                                
                             End If
                             
                             Sheets("pedidos").Select
@@ -310,6 +336,7 @@ If Me.TxtIdCliente.Value <> Empty Then
         MsgBox "Debe validar el cliente"
 End If
 End Sub
+
 Private Sub BtnCotMasiva_Click()
     Application.ScreenUpdating = False
     If Me.TxtIdCliente.Value <> Empty Then
@@ -400,7 +427,14 @@ Private Sub BtnCotMasiva_Click()
                                 Cells(NR, 4) = Me.TxtDescCliente.Value
                                 Cells(NR, 5) = cod_prod
                                 Cells(NR, 6) = desc_prod
-                                Cells(NR, 7) = "=[@[TARIFARIO $/M2]]*[@M2]"
+                                If IsNumeric(Me.CotDolar.Value) And CDbl(Me.CotDolar.Value) > 0 Then
+                                    cotizacionDolar = CDbl(Me.CotDolar.Value)
+                                    Cells(NR, 7).Formula = "=[@[TARIFARIO $/M2]]*[@M2] / " & cotizacionDolar
+                                    
+                                    Cells(NR, 7).NumberFormat = "_-""USD""* #,##0.00_-;_-""USD""* #,##0.00_-;_-""USD""* ""-""??_-;_-@_-"
+                                Else
+                                    Cells(NR, 7).Formula = "=[@[TARIFARIO $/M2]]*[@M2]"
+                                End If
                                 Cells(NR, 9) = Trim(calidad)
                                 Cells(NR, 11) = m2
                                 Cells(NR, 12) = "NO"
@@ -417,7 +451,14 @@ Private Sub BtnCotMasiva_Click()
                                 Cells(NR, 4) = Me.TxtDescCliente.Value
                                 Cells(NR, 5) = cod_prod
                                 Cells(NR, 6) = desc_prod
-                                Cells(NR, 7) = "=[@[TARIFARIO $/M2]]*[@M2]"
+                                If IsNumeric(Me.CotDolar.Value) And CDbl(Me.CotDolar.Value) > 0 Then
+                                    cotizacionDolar = CDbl(Me.CotDolar.Value)
+                                    Cells(NR, 7).Formula = "=[@[TARIFARIO $/M2]]*[@M2] / " & cotizacionDolar
+                                    
+                                    Cells(NR, 7).NumberFormat = "_-""USD""* #,##0.00_-;_-""USD""* #,##0.00_-;_-""USD""* ""-""??_-;_-@_-"
+                                Else
+                                    Cells(NR, 7).Formula = "=[@[TARIFARIO $/M2]]*[@M2]"
+                                End If
                                 Cells(NR, 9) = Trim(calidad)
                                 Cells(NR, 11) = m2
                                 Cells(NR, 12) = "SI"
@@ -435,6 +476,9 @@ Private Sub BtnCotMasiva_Click()
     Worksheets(activeSheetName).Select
     
     MsgBox "cotizacion masiva cargada"
+    
+    ' Cierra el formulario completamente
+    Unload Me
 End If
 Application.ScreenUpdating = True
 End Sub
@@ -565,19 +609,6 @@ Private Sub BtnValidar_Click()
     Me.Txtcotiz.Locked = True
 End Sub
 
-Private Sub Frame1_Click()
-
-End Sub
-
-Private Sub LblDescripcionTexto_Click()
-
-End Sub
-
-Private Sub Lblordentexto_Click()
-
-End Sub
-
-
 Private Sub ComboBoxProductos_Change()
 Dim Cell As Range
 Dim i As Single
@@ -607,17 +638,15 @@ Next i
 TxtCategoria.Locked = False
 End Sub
 
-Private Sub OptionButton1_Click()
-
-End Sub
-
-Private Sub ListCoincidencias_Change()
-
-End Sub
 
 
 
-Private Sub Label22_Click()
+
+
+
+
+
+Private Sub Label23_Click()
 
 End Sub
 
@@ -676,22 +705,6 @@ Private Sub TxtBusqueda_Change()
     Next i
 End Sub
 
-Private Sub EjecutorCotizacion_Change()
-
-End Sub
-
-Private Sub TxtCalidad_Change()
-
-End Sub
-
-Private Sub TxtCliente_Change()
-
-End Sub
-
-Private Sub Txtcotiz_Change()
-
-End Sub
-
 Private Sub UserForm_Initialize()
     
     Dim lastRow As Long
@@ -706,6 +719,7 @@ Private Sub UserForm_Initialize()
         nextNumber = 1 ' Si no hay datos, comenzar desde 1
     End If
     
+    Me.CotDolar.Value = 0
     Me.Txtcotiz.Value = nextNumber
     
     Dim j As Long
@@ -732,7 +746,7 @@ Private Sub UserForm_Initialize()
     Next j
     
     Me.Width = 540
-    Me.Height = 502
+    Me.Height = 504
     Me.StartUpPosition = 0
     Me.Top = Application.Top + (Application.Height - Me.Height) / 2
     Me.Left = Application.Left + (Application.Width - Me.Width) / 2
